@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="icon.png" type="image/png">
+    <title>Game Launcher</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #1e1e2f;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h1 {
+            margin: 20px 0;
+            font-size: 3rem;
+            color: #f5a623;
+        }
+
+        #ip-config {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        #ip-input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 300px;
+            margin-right: 10px;
+        }
+
+        #set-ip-btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #set-ip-btn:hover {
+            background-color: #d4881c;
+        }
+
+        #systems-grid, #games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin: 20px;
+            width: 80%;
+            justify-content: center;
+        }
+
+        .system, .game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #2e2e40;
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .system:hover, .game:hover {
+            transform: scale(1.05);
+            background-color: #393955;
+        }
+
+        .system img, .game img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .system p, .game p {
+            margin: 0;
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        #game-details {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            margin: 20px;
+        }
+
+        #game-cover {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            margin-bottom: 20px;
+        }
+
+        #return-button, #launch-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            background-color: #f5a623;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #return-button:hover, #launch-button:hover {
+            background-color: #d4881c;
+        }
+    </style>
+</head>
+<body>
+    <h1>ZapBox</h1>
+
+    <!-- IP Address Input -->
+    <div id="ip-config">
+        <input id="ip-input" type="text" placeholder="Enter MiSTer FPGA IP address (e.g., 192.168.1.100)">
+        <button id="set-ip-btn" onclick="updateMisterIP()">Set IP</button>
+    </div>
+
+    <!-- Systems Grid -->
+    <div id="systems-grid">
+        <div class="system" onclick="fetchGames('NES')">
+            <img src="nes.png" alt="NES">
+            <p>NES</p>
+        </div>
+        <div class="system" onclick="fetchGames('SNES')">
+            <img src="snes.png" alt="SNES">
+            <p>SNES</p>
+        </div>
+        <div class="system" onclick="fetchGames('Genesis')">
+            <img src="genesis.png" alt="Genesis">
+            <p>Genesis</p>
+        </div>
+        <div class="system" onclick="fetchGames('PSX')">
+            <img src="psx.png" alt="PSX">
+            <p>PSX</p>
+        </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div id="games-grid"></div>
+
+    <!-- Game Details -->
+    <div id="game-details">
+        <button id="return-button" onclick="returnToGamesGrid()">Return to Games Grid</button>
+        <img id="game-cover" src="" alt="Game Cover">
+        <h2 id="game-title"></h2>
+        <p id="game-description"></p>
+        <button id="launch-button">Launch Game</button>
+    </div>
+
+    <script>
+        let misterIP = null;
+        let zaparooSocket;
+
+        function updateMisterIP() {
+            const ipInput = document.getElementById("ip-input").value.trim();
+            if (ipInput) {
+                misterIP = ipInput;
+                console.log(`MiSTer FPGA IP updated to: ${misterIP}`);
+                connectToWebSocket();
+            } else {
+                alert("Please enter a valid IP address.");
+            }
+        }
+
+        function connectToWebSocket() {
+            if (zaparooSocket) zaparooSocket.close();
+            const ZAPAROO_WS_URL = `ws://${misterIP}:7497`;
+            zaparooSocket = new WebSocket(ZAPAROO_WS_URL);
+
+            zaparooSocket.onopen = () => {
+                console.log("Connected to Zaparoo WebSocket");
+                zaparooSocket.send(JSON.stringify({ type: "request_games" }));
+            };
+
+            zaparooSocket.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("Received data:", data);
+
+                if (data.type === "game_update") addGameToUI(data.system, data.game);
+                else if (data.type === "game_list") populateGamesGrid(data.system, data.games);
+            };
+
+            zaparooSocket.onclose = () => console.error("Disconnected from Zaparoo WebSocket");
+            zaparooSocket.onerror = (error) => console.error("WebSocket error:", error);
+        }
+
+        function fetchGames(system) {
+            console.log(`Fetching games for system: ${system}`);
+        }
+
+        function populateGamesGrid(system, games) {
+            const gamesGrid = document.getElementById("games-grid");
+            const systemsGrid = document.getElementById("systems-grid");
+
+            systemsGrid.style.display = "none";
+            gamesGrid.innerHTML = "";
+            gamesGrid.style.display = "grid";
+
+            games.forEach(game => addGameToUI(system, game));
+        }
+
+        function addGameToUI(system, game) {
+            const gamesGrid = document.getElementById("games-grid");
+
+            const gameDiv = document.createElement("div");
+            gameDiv.className = "game";
+            gameDiv.onclick = () => displayGameDetails(game);
+
+            const img = document.createElement("img");
+            img.src = game.boxArtUrl || "placeholder.png";
+            img.alt = game.title;
+
+            const title = document.createElement("p");
+            title.textContent = game.title;
+
+            gameDiv.appendChild(img);
+            gameDiv.appendChild(title);
+            gamesGrid.appendChild(gameDiv);
+        }
+
+        function displayGameDetails(game) {
+            const gameDetails = document.getElementById("game-details");
+            const gamesGrid = document.getElementById("games-grid");
+
+            gamesGrid.style.display = "none";
+            document.getElementById("game-cover").src = game.boxArtUrl || "placeholder.png";
+            document.getElementById("game-title").textContent = game.title;
+            document.getElementById("game-description").textContent = game.description || "No description available.";
+
+            const launchButton = document.getElementById("launch-button");
+            launchButton.onclick = () => window.location.href = game.launchUrl;
+
+            gameDetails.style.display = "block";
+        }
+
+        function returnToGamesGrid() {
+            const gamesGrid = document.getElementById("games-grid");
+            const gameDetails = document.getElementById("game-details");
+            gameDetails.style.display = "none";
+            gamesGrid.style.display = "grid";
+        }
+
+        connectToWebSocket();
+    </script>
+</body>
+</html>
