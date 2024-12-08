@@ -1,5 +1,6 @@
 let misterIP = localStorage.getItem("misterIP") || "";
-document.getElementById("ip-input").value = misterIP;
+console.log(misterIP)
+document.getElementById("ip-input").value = misterIP; 
 let zaparooSocket;
 
 function updateMisterIP() {
@@ -50,13 +51,31 @@ function connectToWebSocket() {
   };
 
   zaparooSocket.onmessage = (event) => {
-    const data = JSON.parse(event.data);
-    console.log("Received data:", data);
+    try {
+        const data = JSON.parse(event.data);
+        console.log("Received data:", data);
+        if (data.method === "game_update" && data.params) {
+          console.log('update')
+            addGameToUI(data.params.system, data.params.game);
+        }
+        else if (data.method === "game_list" && data.params) {
+          console.log('list')
+        }
+        else if (data.result && Array.isArray(data.result.results))
+        {
+          const games = data.result.results;
 
-    if (data.type === "game_update") addGameToUI(data.system, data.game);
-    else if (data.type === "game_list")
-      populateGamesGrid(data.system, data.games);
-  };
+          if (games && games.length > 0) {
+              const system = games[0].system;
+              populateGamesGrid(system, games);
+          } else {
+              populateGamesGrid(null, []);
+          }
+        }
+    } catch (error) {
+        console.error("Fout lahhhhhh:", error);
+    }
+};
 
   zaparooSocket.onclose = () =>
     console.error("Disconnected from Zaparoo WebSocket");
@@ -65,6 +84,7 @@ function connectToWebSocket() {
 
 function fetchGames(system) {
   console.log(`Fetching games for system: ${system}`);
+  const abc = mediaSearchPayload(system)
 }
 
 function populateGamesGrid(system, games) {
@@ -109,7 +129,12 @@ function displayGameDetails(game) {
     game.description || "No description available.";
 
   const launchButton = document.getElementById("launch-button");
-  launchButton.onclick = () => (window.location.href = game.launchUrl);
+  launchButton.onclick = () => {
+    const isProt = misterIP.startsWith('http://') || misterIP.startsWith('https://');
+    const prot = isProt ? '' : 'http://';
+    const encodedUrl = encodeURIComponent(game.path).replace(/%2F/g, '/').replace(/%20/g, ' ')
+    window.location.href = `${prot}${misterIP}:7497/l/${encodedUrl}`
+    };
 
   gameDetails.style.display = "block";
 }
