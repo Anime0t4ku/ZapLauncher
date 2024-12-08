@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -52,7 +53,8 @@
             background-color: #d4881c;
         }
 
-        #systems-grid, #games-grid {
+        #systems-grid,
+        #games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             gap: 20px;
@@ -61,7 +63,8 @@
             justify-content: center;
         }
 
-        .system, .game {
+        .system,
+        .game {
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -72,19 +75,22 @@
             transition: transform 0.2s, background-color 0.2s;
         }
 
-        .system:hover, .game:hover {
+        .system:hover,
+        .game:hover {
             transform: scale(1.05);
             background-color: #393955;
         }
 
-        .system img, .game img {
+        .system img,
+        .game img {
             width: 100px;
             height: 100px;
             object-fit: contain;
             margin-bottom: 10px;
         }
 
-        .system p, .game p {
+        .system p,
+        .game p {
             margin: 0;
             font-size: 1rem;
             text-align: center;
@@ -105,7 +111,8 @@
             margin-bottom: 20px;
         }
 
-        #return-button, #launch-button {
+        #return-button,
+        #launch-button {
             padding: 10px 20px;
             font-size: 16px;
             margin: 10px;
@@ -116,11 +123,13 @@
             cursor: pointer;
         }
 
-        #return-button:hover, #launch-button:hover {
+        #return-button:hover,
+        #launch-button:hover {
             background-color: #d4881c;
         }
     </style>
 </head>
+
 <body>
     <h1>ZapBox</h1>
 
@@ -162,100 +171,7 @@
         <button id="launch-button">Launch Game</button>
     </div>
 
-    <script>
-        let misterIP = null;
-        let zaparooSocket;
-
-        function updateMisterIP() {
-            const ipInput = document.getElementById("ip-input").value.trim();
-            if (ipInput) {
-                misterIP = ipInput;
-                console.log(`MiSTer FPGA IP updated to: ${misterIP}`);
-                connectToWebSocket();
-            } else {
-                alert("Please enter a valid IP address.");
-            }
-        }
-
-        function connectToWebSocket() {
-            if (zaparooSocket) zaparooSocket.close();
-            const ZAPAROO_WS_URL = `ws://${misterIP}:7497`;
-            zaparooSocket = new WebSocket(ZAPAROO_WS_URL);
-
-            zaparooSocket.onopen = () => {
-                console.log("Connected to Zaparoo WebSocket");
-                zaparooSocket.send(JSON.stringify({ type: "request_games" }));
-            };
-
-            zaparooSocket.onmessage = (event) => {
-                const data = JSON.parse(event.data);
-                console.log("Received data:", data);
-
-                if (data.type === "game_update") addGameToUI(data.system, data.game);
-                else if (data.type === "game_list") populateGamesGrid(data.system, data.games);
-            };
-
-            zaparooSocket.onclose = () => console.error("Disconnected from Zaparoo WebSocket");
-            zaparooSocket.onerror = (error) => console.error("WebSocket error:", error);
-        }
-
-        function fetchGames(system) {
-            console.log(`Fetching games for system: ${system}`);
-        }
-
-        function populateGamesGrid(system, games) {
-            const gamesGrid = document.getElementById("games-grid");
-            const systemsGrid = document.getElementById("systems-grid");
-
-            systemsGrid.style.display = "none";
-            gamesGrid.innerHTML = "";
-            gamesGrid.style.display = "grid";
-
-            games.forEach(game => addGameToUI(system, game));
-        }
-
-        function addGameToUI(system, game) {
-            const gamesGrid = document.getElementById("games-grid");
-
-            const gameDiv = document.createElement("div");
-            gameDiv.className = "game";
-            gameDiv.onclick = () => displayGameDetails(game);
-
-            const img = document.createElement("img");
-            img.src = game.boxArtUrl || "placeholder.png";
-            img.alt = game.title;
-
-            const title = document.createElement("p");
-            title.textContent = game.title;
-
-            gameDiv.appendChild(img);
-            gameDiv.appendChild(title);
-            gamesGrid.appendChild(gameDiv);
-        }
-
-        function displayGameDetails(game) {
-            const gameDetails = document.getElementById("game-details");
-            const gamesGrid = document.getElementById("games-grid");
-
-            gamesGrid.style.display = "none";
-            document.getElementById("game-cover").src = game.boxArtUrl || "placeholder.png";
-            document.getElementById("game-title").textContent = game.title;
-            document.getElementById("game-description").textContent = game.description || "No description available.";
-
-            const launchButton = document.getElementById("launch-button");
-            launchButton.onclick = () => window.location.href = game.launchUrl;
-
-            gameDetails.style.display = "block";
-        }
-
-        function returnToGamesGrid() {
-            const gamesGrid = document.getElementById("games-grid");
-            const gameDetails = document.getElementById("game-details");
-            gameDetails.style.display = "none";
-            gamesGrid.style.display = "grid";
-        }
-
-        connectToWebSocket();
-    </script>
+    <script src="./gameLauncher.js"></script>
 </body>
+
 </html>
