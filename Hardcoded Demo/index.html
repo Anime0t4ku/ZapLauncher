@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="icon.png" type="image/png">
+    <title>Game Launcher</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e1e;
+            color: white;
+            text-align: center;
+            width: 100%;
+        }
+        #systems-grid, #games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+            justify-content: center;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .system, .game {
+            cursor: pointer;
+            text-align: center;
+        }
+        .system img, .game img {
+            max-width: 150px;
+            max-height: 150px;
+            object-fit: contain;
+            margin: 0 auto;
+        }
+        .system p, .game p {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        #game-details {
+            display: none;
+            margin: 20px;
+            padding: 20px;
+            background: #2a2a2a;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        #game-cover {
+            width: 300px;
+            height: auto;
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        #return-button {
+            background-color: #007bff;
+            color: white;
+        }
+        #return-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>ZapBox</h1>
+
+    <!-- Systems Grid -->
+    <div id="systems-grid">
+        <div class="system" onclick="fetchGames('NES')">
+            <img src="nes.png" alt="NES">
+            <p>NES</p>
+        </div>
+        <div class="system" onclick="fetchGames('SNES')">
+            <img src="snes.png" alt="SNES">
+            <p>SNES</p>
+        </div>
+        <div class="system" onclick="fetchGames('Genesis')">
+            <img src="genesis.png" alt="Genesis">
+            <p>Genesis</p>
+        </div>
+        <div class="system" onclick="fetchGames('PSX')">
+            <img src="psx.png" alt="PSX">
+            <p>PSX</p>
+        </div>
+    </div>
+
+    <!-- Games Grid -->
+    <div id="games-grid"></div>
+
+    <!-- Game Details -->
+    <div id="game-details">
+        <button id="return-button" onclick="returnToGamesGrid()">Return to Games Grid</button>
+        <img id="game-cover" src="" alt="Game Cover">
+        <h2 id="game-title"></h2>
+        <p id="game-description"></p>
+        <button id="launch-button">Launch Game</button>
+    </div>
+
+    <script>
+        const API_URL = "ws://192.168.23.115";
+
+        // Example games for each system
+        const gamesData = {
+            NES: [
+                { title: "Super Mario Bros.", boxArtUrl: "https://images.launchbox-app.com/e078d459-a166-47a2-9b5a-26a9fd7cd924.jpg", description: "The classic platformer where Mario saves Princess Peach.", launchUrl: "http://192.168.23.115:7497/l/NES/USA/Super%20Mario%20Bros.%20(USA).nes" },
+                { title: "The Legend of Zelda", boxArtUrl: "https://images.launchbox-app.com/cf17144e-91bb-4727-953b-905aa894644c.png", description: "Explore dungeons, solve puzzles, and defeat Ganon!", launchUrl: "http://192.168.23.115:7497/l/NES/USA/Legend%20of%20Zelda,%20The%20(USA)%20(Rev%201).nes" }
+            ],
+            SNES: [
+                { title: "Super Mario World", boxArtUrl: "https://images.launchbox-app.com/1a175c33-1c72-4524-bc46-9f88b566cb16.jpg", description: "Join Mario and Yoshi in this epic adventure!", launchUrl: "http://192.168.23.115:7497/l/SNES/USA/Super%20Mario%20World%20(USA).sfc" },
+                { title: "The Legend of Zelda: A Link to the Past", boxArtUrl: "https://images.launchbox-app.com/04cfaf16-9aa5-42da-b326-a43149b01f75.jpg", description: "Help Link save Hyrule in this SNES classic.", launchUrl: "http://192.168.23.115:7497/l/SNES/USA/Legend%20of%20Zelda,%20The%20-%20A%20Link%20to%20the%20Past%20(USA).sfc" }
+            ],
+            Genesis: [
+                { title: "Sonic the Hedgehog", boxArtUrl: "https://images.launchbox-app.com/f7f1fdbd-fc6f-430c-8a33-35516e01690c.png", description: "Speed through levels and stop Dr. Robotnik!", launchUrl: "http://192.168.23.115:7497/l/Genesis/Sonic%20The%20Hedgehog%20(USA).md" },
+                { title: "Streets of Rage", boxArtUrl: "https://images.launchbox-app.com/75e8efc5-67bb-4dd3-971f-2784dbb8529e.jpg", description: "Fight against crime in this beat 'em up classic.", launchUrl: "http://192.168.23.115:7497/l/Genesis/Streets%20of%20Rage%202%20(USA).md" }
+            ],
+            PSX: [
+                { title: "Metal Gear Solid", boxArtUrl: "https://images.launchbox-app.com/5e05d377-f292-41ec-a652-1b817ea2f7bb.jpg", description: "Solid Snake must stop the terrorists at Shadow Moses.", launchUrl: "http://192.168.23.115:7497/l/PSX/USA/Multi%20Disc%20(CHD)/Metal%20Gear%20Solid%20(USA)/Metal%20Gear%20Solid%20(USA)%20(Disc%201)%20(v1.1).chd" },
+                { title: "Crash Bandicoot 3", boxArtUrl: "https://images.launchbox-app.com/62058421-e686-46b2-a731-4a7a401bfb07.jpg", description: "Gather all crystal by traveling back in different time periods and stop DR. Neo Cortex.", launchUrl: "http://192.168.23.115:7497/l/PSX/USA/Crash%20Bandicoot%20-%20Warped%20(USA).chd" }
+            ]
+        };
+
+        function fetchGames(system) {
+            const gamesGrid = document.getElementById("games-grid");
+            const systemsGrid = document.getElementById("systems-grid");
+            const gameDetails = document.getElementById("game-details");
+
+            // Hide other sections
+            systemsGrid.style.display = "none";
+            gameDetails.style.display = "none";
+
+            // Clear the games grid
+            gamesGrid.innerHTML = "";
+            gamesGrid.style.display = "grid";
+
+            const games = gamesData[system] || [];
+            games.forEach(game => {
+                const gameDiv = document.createElement("div");
+                gameDiv.className = "game";
+                gameDiv.onclick = () => displayGameDetails(game);
+
+                const img = document.createElement("img");
+                img.src = game.boxArtUrl || "placeholder.png";
+                img.alt = game.title;
+
+                const title = document.createElement("p");
+                title.textContent = game.title;
+
+                gameDiv.appendChild(img);
+                gameDiv.appendChild(title);
+                gamesGrid.appendChild(gameDiv);
+            });
+
+            // Add return to systems button
+            const returnButton = document.createElement("button");
+            returnButton.textContent = "Return to Systems";
+            returnButton.onclick = () => returnToSystems();
+            gamesGrid.appendChild(returnButton);
+        }
+
+        function displayGameDetails(game) {
+            const gameDetails = document.getElementById("game-details");
+            const gamesGrid = document.getElementById("games-grid");
+
+            // Hide games grid
+            gamesGrid.style.display = "none";
+
+            // Show game details
+            document.getElementById("game-cover").src = game.boxArtUrl || "placeholder.png";
+            document.getElementById("game-title").textContent = game.title;
+            document.getElementById("game-description").textContent = game.description || "No description available.";
+
+            const launchButton = document.getElementById("launch-button");
+
+            // Set the launch URL for the specific game
+            launchButton.onclick = () => window.location.href = game.launchUrl;
+
+            gameDetails.style.display = "block";
+        }
+
+        function returnToSystems() {
+            const systemsGrid = document.getElementById("systems-grid");
+            const gameDetails = document.getElementById("game-details");
+            gameDetails.style.display = "none";
+            systemsGrid.style.display = "grid";
+        }
+
+        function returnToGamesGrid() {
+            const gamesGrid = document.getElementById("games-grid");
+            const gameDetails = document.getElementById("game-details");
+            gameDetails.style.display = "none";
+            gamesGrid.style.display = "grid";
+        }
+    </script>
+</body>
+</html>
