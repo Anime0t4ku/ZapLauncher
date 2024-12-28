@@ -1,15 +1,16 @@
 import React from 'react';
-import { Settings, ArrowLeft, Zap } from 'lucide-react';
+import { Settings, ArrowLeft, Menu, PanelLeftOpen } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 interface NavbarProps {
   onOpenSettings: () => void;
+  onMenuClick: () => void;
   onBack?: () => void;
   showBack?: boolean;
 }
 
-export default function Navbar({ onOpenSettings, onBack, showBack }: NavbarProps) {
+export default function Navbar({ onOpenSettings, onMenuClick, onBack, showBack }: NavbarProps) {
   const { isConnected } = useWebSocket();
 
   return (
@@ -25,12 +26,12 @@ export default function Navbar({ onOpenSettings, onBack, showBack }: NavbarProps
                 <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
             ) : (
-              <div className="flex items-center gap-2">
-                <Zap className="w-6 h-6 text-blue-500" />
-                <span className="text-lg font-bold text-gray-900 dark:text-white">
-                  ZapBox
-                </span>
-              </div>
+              <button
+                onClick={onMenuClick}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-2"
+              >
+                <PanelLeftOpen className="w-5 h-5 text-gray-600 dark:text-gray-300" />
+              </button>
             )}
           </div>
 

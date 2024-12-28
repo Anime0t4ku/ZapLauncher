@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import AuthCallback from './components/auth/AuthCallback';
 import Auth from './pages/Auth';
+import Sidebar from './components/Sidebar';
 import Navbar from './components/Navbar';
 import SystemGrid from './components/systems/SystemGrid';
 import GameDetails from './components/game/GameDetails';
@@ -24,6 +25,7 @@ import { useWebSocket } from './hooks/useWebSocket';
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [searchOpen, setSearchOpen] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [selectedCore, setSelectedCore] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -78,8 +80,20 @@ function App() {
             <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors relative">
                 <Navbar 
                   onOpenSettings={() => setSettingsOpen(true)}
+                  onMenuClick={() => setSidebarOpen(true)}
                   onBack={selectedGame ? () => setSelectedGame(null) : selectedCore ? () => setSelectedCore(null) : undefined}
                   showBack={!!selectedCore || !!selectedGame}
+                />
+
+                <Sidebar
+                  systems={systems}
+                  isOpen={sidebarOpen}
+                  onClose={() => setSidebarOpen(false)}
+                  selectedCore={selectedCore}
+                  onCoreSelect={(core) => {
+                    setSelectedCore(core);
+                    setSidebarOpen(false);
+                  }}
                 />
 
                 <SettingsModal
@@ -139,6 +153,7 @@ function App() {
                 <BottomNav
                   viewMode={viewMode}
                   setViewMode={setViewMode}
+                  onMenuClick={() => setSidebarOpen(true)}
                   onSearchClick={() => setSearchOpen(true)} 
                 />
               </div>

@@ -31,19 +31,20 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm overflow-y-auto">
-      <div className="relative w-full max-w-4xl bg-white dark:bg-gray-800 rounded-lg shadow-xl my-8 mx-4">
+    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm overflow-y-auto">
+      <div className="min-h-screen sm:flex sm:items-center sm:p-4">
+        <div className="w-full sm:max-w-4xl mx-auto bg-white dark:bg-gray-800 sm:rounded-2xl shadow-xl animate-fade-in">
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+          className="absolute top-4 right-4 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
         >
           <X className="h-6 w-6" />
         </button>
 
-        <div className="flex border-b border-gray-200 dark:border-gray-700">
+        <div className="flex overflow-x-auto border-b border-gray-200 dark:border-gray-700 scrollbar-none">
           <button
             onClick={() => setActiveTab('general')}
-            className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+            className={`flex items-center gap-2 px-6 py-5 font-medium transition-colors whitespace-nowrap ${
               activeTab === 'general'
                 ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -56,7 +57,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {(isAdmin || isParent) && (
             <button
               onClick={() => setActiveTab('parental')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-5 font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'parental'
                   ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -70,7 +71,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {isAdmin && (
             <button
               onClick={() => setActiveTab('users')}
-              className={`flex items-center gap-2 px-6 py-4 font-medium transition-colors ${
+              className={`flex items-center gap-2 px-6 py-5 font-medium transition-colors whitespace-nowrap ${
                 activeTab === 'users'
                   ? 'text-blue-600 dark:text-blue-400 border-b-2 border-blue-600 dark:border-blue-400'
                   : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
@@ -82,9 +83,9 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           )}
         </div>
 
-        <div className="p-6">
+        <div className="p-6 sm:p-8">
           {activeTab === 'general' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               <h3 className="text-lg font-medium text-gray-900 dark:text-white">
                 Connection Settings
               </h3>
@@ -103,6 +104,7 @@ export default function SettingsModal({ isOpen, onClose }: SettingsModalProps) {
           {activeTab === 'parental' && (isAdmin || isParent) && (
             <ParentalControls userId={user?.id || ''} />
           )}
+        </div>
         </div>
       </div>
     </div>
