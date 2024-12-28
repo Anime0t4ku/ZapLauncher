@@ -1,8 +1,7 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { System } from '../types/system';
-import { X, Star, Clock, Gamepad2, Cpu, Sword, Joystick, Zap, PanelLeftClose } from 'lucide-react';
+import { Star, Trophy, Gamepad2, Cpu, Sword, Joystick, ChevronRight } from 'lucide-react';
 import ThemeToggle from './ThemeToggle';
-import SettingsPanel from './settings/SettingsPanel';
 
 const iconMap = {
   Gamepad2,
@@ -26,82 +25,96 @@ export default function Sidebar({
   selectedCore,
   onCoreSelect 
 }: SidebarProps) {
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (isOpen && sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
+        onClose();
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose]);
+
   return (
     <>
       {/* Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden animate-fade-in"
-          onClick={onClose}
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden animate-fade-in touch-none"
         />
       )}
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-[300px] max-w-[85%] bg-white dark:bg-gray-800 shadow-lg transform transition-transform duration-300 ease-in-out z-50
+        ref={sidebarRef}
+        className={`fixed top-0 left-0 h-full w-[280px] max-w-[85%] bg-gray-50 dark:bg-gray-900 shadow-lg transform transition-transform duration-300 ease-in-out z-50
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}
       >
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center gap-2">
-              <Zap className="w-6 h-6 text-blue-500" />
-              <span className="text-lg font-bold dark:text-white">MiSTer FPGA</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                aria-label="Close menu"
+          <div className="p-6">
+            <h2 className="text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
+              Dashboards
+            </h2>
+
+            <nav className="space-y-1">
+              <button 
+                onClick={() => onCoreSelect(null)}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm
+                  ${!selectedCore 
+                    ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium' 
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                  }`}
               >
-                <PanelLeftClose className="w-5 h-5 dark:text-gray-400" />
+                <div className="flex items-center gap-3">
+                  <Star className="w-4 h-4" />
+                  <span>Overview</span>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100" />
               </button>
-            </div>
+
+              <button
+                onClick={() => onCoreSelect('leaderboard')}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <Trophy className="w-4 h-4" />
+                  <span>Leaderboard</span>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100" />
+              </button>
+            </nav>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin">
-            <button 
-              onClick={() => onCoreSelect(null)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all active:scale-[0.98]
-                ${!selectedCore 
-                  ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
-                  : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
-                }`}
-            >
-              <Star className="w-5 h-5" />
-              <span className="font-medium">All Games</span>
-            </button>
-
-            <button
-              onClick={() => onCoreSelect(null)}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 transition-all active:scale-[0.98] font-medium"
-            >
-              <Clock className="w-5 h-5" />
-              <span>Recent</span>
-            </button>
-
-            <div className="mt-8">
-              <h3 className="px-4 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">
-                Systems
-              </h3>
+          <div className="px-6 py-4">
+            <h2 className="text-sm font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-4">
+              Systems
+            </h2>
+            <nav className="space-y-1">
               {systems?.map((system) => {
                 const IconComponent = iconMap[system.icon as keyof typeof iconMap];
                 return (
                   <button
                     key={system.id}
                     onClick={() => onCoreSelect(system.id)}
-                    className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all active:scale-[0.98]
+                    className={`w-full flex items-center justify-between px-3 py-2 rounded-lg transition-colors text-sm group
                       ${selectedCore === system.id 
-                        ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' 
-                        : 'hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300'
+                        ? 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 font-medium' 
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
                       }`}
                   >
-                    <IconComponent className="w-5 h-5" />
-                    <span className="font-medium">{system.name}</span>
+                    <div className="flex items-center gap-3">
+                      <IconComponent className="w-4 h-4" />
+                      <span>{system.name}</span>
+                    </div>
+                    <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100" />
                   </button>
                 );
               })}
-            </div>
-          </nav>
+            </nav>
+          </div>
           
           <div className="mt-auto border-t border-gray-200 dark:border-gray-700">
             <ThemeToggle />

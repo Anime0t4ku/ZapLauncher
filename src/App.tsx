@@ -12,6 +12,7 @@ import BottomNav from './components/BottomNav';
 import GameActions from './components/game/GameActions';
 import SearchOverlay from './components/SearchOverlay';
 import SettingsModal from './components/settings/SettingsModal';
+import LeaderboardPage from './components/leaderboard/LeaderboardPage';
 import AddGameModal from './components/game/AddGameModal';
 import RecentGames from './components/dashboard/RecentGames';
 import FavoritesCard from './components/systems/FavoritesCard';
@@ -122,6 +123,8 @@ function App() {
                       onBack={() => setSelectedGame(null)}
                       onLaunch={handleGameLaunch}
                     />
+                  ) : selectedCore === 'leaderboard' ? (
+                    <LeaderboardPage />
                   ) : !selectedCore ? (
                     <div className="p-6 space-y-8">
                       <RecentGames games={games} onGameSelect={handleGameSelect} />

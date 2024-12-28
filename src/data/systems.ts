@@ -3,7 +3,7 @@ import { System } from '../types/system';
 export const systems: System[] = [
   {
     id: 'nes',
-    name: 'Nintendo Entertainment System',
+    name: 'NES',
     shortName: 'NES',
     icon: 'Gamepad2',
     description: '8-bit home video game console',
@@ -14,7 +14,7 @@ export const systems: System[] = [
   },
   {
     id: 'snes',
-    name: 'Super Nintendo Entertainment System',
+    name: 'SNES',
     shortName: 'SNES',
     icon: 'Cpu',
     description: '16-bit home video game console',
