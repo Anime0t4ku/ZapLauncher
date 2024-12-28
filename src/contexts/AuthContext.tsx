@@ -11,8 +11,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
 }
 
-export const AuthContext = createContext<AuthContextType>({
-  user: { id: 'mock-user', email: 'test@example.com' },
+const AuthContext = createContext<AuthContextType>({
+  user: { id: '00000000-0000-0000-0000-000000000000', email: 'test@example.com' },
   loading: false,
   error: null,
   isAdmin: true,
@@ -23,5 +23,11 @@ export const AuthContext = createContext<AuthContextType>({
 });
 
 export function useAuth() {
-  return useContext(AuthContext);
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }
+
+export { AuthContext };
