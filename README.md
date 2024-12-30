@@ -80,6 +80,7 @@ The application can be easily deployed to Netlify or other hosting platforms. Th
 - Anime0t4ku
 - Wizzo
 - Davidpreid
+- vlinpalm
 
 ## License
 
