@@ -1,6 +1,6 @@
 # ZapLauncher
 
-A modern, feature-rich web interface for MiSTer FPGA game management, forked from the Zaparoo project.
+A modern, feature-rich web interface for MiSTer FPGA game management, using the Zaparoo websocket.
 
 ## About
 
@@ -76,13 +76,12 @@ npm run build
 
 The application can be easily deployed to Netlify or other hosting platforms. The build process is automatically configured for optimal production deployment.
 
-## Credits
-
-This project is a fork of the game launcher component from the Zaparoo project.
-
-### Original Authors
-- **Callan Barrett** (wizzomafizzo)
-- **Bjorn Logan** (Anime0t4ku)
+### Contributors
+- Anime0t4ku
+- Wizzo
+- Davidpreid
+- vlinpalm
+- BedroomNinja
 
 ## License
 
