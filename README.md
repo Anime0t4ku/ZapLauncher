@@ -1,4 +1,4 @@
-# ZapBox
+# ZapLauncher version 00.1a
 
 A modern web interface for MiSTer FPGA game management, forked from the Zaparoo project.
 
