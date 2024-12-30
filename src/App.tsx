@@ -12,6 +12,7 @@ import BottomNav from './components/BottomNav';
 import GameActions from './components/game/GameActions';
 import SearchOverlay from './components/SearchOverlay';
 import SettingsModal from './components/settings/SettingsModal';
+import CardCollection from './components/collection/CardCollection';
 import LeaderboardPage from './components/leaderboard/LeaderboardPage';
 import AddGameModal from './components/game/AddGameModal';
 import RecentGames from './components/dashboard/RecentGames';
@@ -123,6 +124,8 @@ function App() {
                       onBack={() => setSelectedGame(null)}
                       onLaunch={handleGameLaunch}
                     />
+                  ) : selectedCore === 'collection' ? (
+                    <CardCollection />
                   ) : selectedCore === 'leaderboard' ? (
                     <LeaderboardPage />
                   ) : !selectedCore ? (

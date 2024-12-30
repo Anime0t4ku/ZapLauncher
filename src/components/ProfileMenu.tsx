@@ -10,6 +10,7 @@ interface ProfileMenuProps {
 export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [handle, setHandle] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isEditingHandle, setIsEditingHandle] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const { user, signOut } = useAuth();
@@ -17,18 +18,20 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
   useEffect(() => {
     async function loadUserHandle() {
       if (!user) return;
-
       const { data, error } = await supabase
         .from('user_roles')
         .select('handle')
         .eq('user_id', user.id);
 
-      // Handle array response instead of single row
-      if (!error && data && data.length > 0) {
-        setHandle(data[0].handle || '');
+      if (error) {
+        console.error('Error loading handle:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        setHandle(data[0].handle);
       } else {
-        // Set a temporary handle if none exists
-        setHandle('user' + user.id.substring(0, 8));
+        console.warn('No handle found for user');
       }
     }
 
@@ -49,6 +52,7 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
   const updateHandle = async (newHandle: string) => {
     if (!user) return;
     if (!newHandle.trim()) return;
+    setError(null);
 
     try {
       const { data, error } = await supabase.rpc('verify_user_handle', {
@@ -57,7 +61,7 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
       });
 
       if (error) throw error;
-      
+
       if (data.success) {
         setHandle(data.handle);
         setIsEditingHandle(false);
@@ -66,7 +70,7 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
       }
     } catch (error) {
       console.error('Failed to update handle:', error);
-      // Keep editing mode active on error
+      setError(error instanceof Error ? error.message : 'Failed to update handle');
       setIsEditingHandle(true);
     }
   };
@@ -95,7 +99,6 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
             {isEditingHandle ? (
               <input
                 type="text"
-                pattern="[a-zA-Z0-9_-]{3,30}"
                 value={handle}
                 onChange={(e) => setHandle(e.target.value)}
                 onKeyDown={(e) => {
@@ -121,6 +124,11 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
                 {handle || 'Set handle'}
               </p>
             )}
+            {error && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+                {error}
+              </p>
+            )}
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
               {user?.email}
             </p>
@@ -137,8 +145,16 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
               <Settings className="w-4 h-4" />
               Settings
             </button>
-            <button
-              onClick={() => signOut()}
+            <button 
+              onClick={async () => {
+                setIsOpen(false);
+                try {
+                  await signOut();
+                  window.location.href = '/auth';
+                } catch (error) {
+                  console.error('Error signing out:', error);
+                }
+              }}
               className="w-full px-4 py-2 text-left text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2"
             >
               <LogOut className="w-4 h-4" />

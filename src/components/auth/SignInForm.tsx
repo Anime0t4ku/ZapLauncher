@@ -17,13 +17,24 @@ export default function SignInForm({ onSignUp, onForgotPassword }: SignInFormPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    if (!email || !password) {
+      setError('Email and password are required');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error: signInError } = await signIn(email, password);
-      if (signInError) throw signInError;
+      if (signInError) {
+        setError(signInError);
+        return;
+      }
+      
+      // Redirect will happen automatically via auth state change
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign in');
+      setError('Failed to sign in. Please try again.');
     } finally {
       setLoading(false);
     }
