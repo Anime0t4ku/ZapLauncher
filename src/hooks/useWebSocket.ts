@@ -8,6 +8,12 @@ export function useWebSocket() {
   const [error, setError] = useState<string | null>(null);
   const { settings, updateSettings } = useMisterSettings();
 
+  const getWebSocketUrl = useCallback((ipAddress: string) => {
+    const isProt = ipAddress.startsWith('http://') || ipAddress.startsWith('https://');
+    const cleanIp = isProt ? ipAddress.replace(/(^\w+:|^)\/\//, '') : ipAddress;
+    return cleanIp;
+  }, []);
+
   const connect = useCallback(async () => {
     if (!settings?.ip_address) {
       setError('MiSTer IP address not configured');
@@ -15,7 +21,7 @@ export function useWebSocket() {
     }
 
     try {
-      const service = new WebSocketService(settings.ip_address);
+      const service = new WebSocketService(getWebSocketUrl(settings.ip_address));
       await service.connect();
       setWsService(service);
       setIsConnected(true);

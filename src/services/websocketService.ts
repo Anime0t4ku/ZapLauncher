@@ -10,9 +10,14 @@ export interface WebSocketMessage {
 export class WebSocketService {
   private ws: WebSocket | null = null;
   private url: string;
+  private reconnectAttempts: number = 0;
+  private maxReconnectAttempts: number = 5;
+  private reconnectDelay: number = 1000;
 
   constructor(ip: string) {
-    this.url = `ws://${ip}:7497`;
+    // Remove protocol if included
+    const cleanIp = ip.replace(/(^\w+:|^)\/\//, '');
+    this.url = `ws://${cleanIp}:7497`;
   }
 
   connect(): Promise<void> {
@@ -20,18 +25,30 @@ export class WebSocketService {
       try {
         this.ws = new WebSocket(this.url);
         
+        // Connection timeout
+        const timeout = setTimeout(() => {
+          if (this.ws?.readyState !== WebSocket.OPEN) {
+            this.ws?.close();
+            reject(new Error('Connection timeout'));
+          }
+        }, 5000);
+        
         this.ws.onopen = () => {
           console.log('Connected to WebSocket');
+          clearTimeout(timeout);
+          this.reconnectAttempts = 0;
           resolve();
         };
 
         this.ws.onerror = (error) => {
           console.error('WebSocket error:', error);
+          clearTimeout(timeout);
           reject(error);
         };
 
         this.ws.onclose = () => {
           console.log('WebSocket connection closed');
+          this.handleReconnect();
         };
 
       } catch (error) {
@@ -40,15 +57,32 @@ export class WebSocketService {
     });
   }
 
+  private handleReconnect() {
+    if (this.reconnectAttempts < this.maxReconnectAttempts) {
+      this.reconnectAttempts++;
+      console.log(`Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts})...`);
+      
+      setTimeout(() => {
+        this.connect().catch(error => {
+          console.error('Reconnection failed:', error);
+        });
+      }, this.reconnectDelay * this.reconnectAttempts);
+    }
+  }
+
   disconnect() {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
+      this.reconnectAttempts = this.maxReconnectAttempts; // Prevent auto-reconnect
     }
   }
 
   send(method: string, params: any): void {
     if (!this.ws) throw new Error('WebSocket not connected');
+    if (this.ws.readyState !== WebSocket.OPEN) {
+      throw new Error('WebSocket connection not open');
+    }
 
     const message: WebSocketMessage = {
       jsonrpc: '2.0',
