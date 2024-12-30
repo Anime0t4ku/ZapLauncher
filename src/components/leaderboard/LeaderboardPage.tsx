@@ -7,7 +7,7 @@ interface PlayerStats {
   total_points: number;
   games_played: number;
   total_playtime: string;
-  user_email?: string;
+  handle?: string;
 }
 
 export default function LeaderboardPage() {
@@ -26,15 +26,17 @@ export default function LeaderboardPage() {
         if (statsError) throw statsError;
 
         // Get user emails in a separate query
-        const { data: users } = await supabase.auth.admin.listUsers();
-        const userMap = new Map(users?.users.map(u => [u.id, u.email]) || []);
+        const { data: userRoles } = await supabase
+          .from('user_roles')
+          .select('user_id, handle');
+        const userMap = new Map(userRoles?.map(u => [u.user_id, u.handle]) || []);
 
         const formattedStats = stats.map(stat => ({
           user_id: stat.user_id,
           total_points: stat.total_points,
           games_played: stat.games_played,
           total_playtime: stat.total_playtime,
-          user_email: userMap.get(stat.user_id) || 'Unknown User'
+          handle: userMap.get(stat.user_id) || 'Unknown Player'
         }));
 
         setPlayers(formattedStats);
@@ -88,7 +90,7 @@ export default function LeaderboardPage() {
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
-                  {index + 1}. {player.user_email?.split('@')[0]}
+                  {index + 1}. {player.handle}
                 </p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">
                   {player.total_points.toLocaleString()} pts
@@ -148,7 +150,7 @@ export default function LeaderboardPage() {
                     {index + 1}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {player.user_email?.split('@')[0]}
+                    {player.handle}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                     {player.total_points.toLocaleString()}

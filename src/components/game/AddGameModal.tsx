@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { generateUUID } from '../../utils/uuid';
 import { Game } from '../../types';
 import { systems } from '../../data/systems';
 
@@ -31,7 +30,8 @@ export default function AddGameModal({ isOpen, onClose, onGameAdded }: AddGameMo
       if (!user) throw new Error('User not authenticated');
 
       const newGame = {
-        id: generateUUID(),
+        // Let Supabase generate the UUID using gen_random_uuid()
+        // id field will be generated server-side
         title,
         system_id: systemId,
         path,

@@ -15,14 +15,18 @@ export class WebSocketService {
   private reconnectDelay: number = 1000;
 
   constructor(ip: string) {
-    // Remove protocol if included
-    const cleanIp = ip.replace(/(^\w+:|^)\/\//, '');
-    this.url = `ws://${cleanIp}:7497`;
+    // Handle IP with or without protocol
+    const cleanIp = ip.replace(/^https?:\/\//, '').replace(/\/$/, '');
+    this.url = `ws://${cleanIp}:7497/ws`;
   }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
       try {
+        if (!this.url.match(/^ws:\/\/[\d.]+:7497\/ws$/)) {
+          throw new Error('Invalid WebSocket URL');
+        }
+
         this.ws = new WebSocket(this.url);
         
         // Connection timeout
@@ -84,11 +88,14 @@ export class WebSocketService {
       throw new Error('WebSocket connection not open');
     }
 
+    // Generate cryptographically secure UUID for message ID
+    const messageId = crypto.randomUUID();
+
     const message: WebSocketMessage = {
       jsonrpc: '2.0',
       method,
       params,
-      id: uuidv4(),
+      id: messageId,
     };
 
     this.ws.send(JSON.stringify(message));

@@ -1,39 +1,63 @@
-# ZapLauncher version 00.1a
+# ZapLauncher
 
-A modern web interface for MiSTer FPGA game management, forked from the Zaparoo project.
+A modern, feature-rich web interface for MiSTer FPGA game management, forked from the Zaparoo project.
 
 ## About
 
-ZapBox is a fork of the game launcher component from the Zaparoo project, enhanced with additional features and a modern UI. It provides a beautiful, responsive interface for managing and launching your MiSTer FPGA games.
+ZapLauncher is a beautiful, responsive web interface that makes managing and launching your MiSTer FPGA games a breeze. With its modern design and powerful features, it provides an exceptional user experience for organizing and playing your retro game collection.
 
-### Features
+### Key Features
 
-- 🎮 Beautiful game grid and list views
+#### Game Management
+- 🎮 Beautiful grid and list view layouts
+- 📱 Fully responsive design for all devices
+- 🔍 Advanced search with filters
+- 📊 Organize games by system
+- ⭐ Favorite games system
+- 📝 Game metadata management
+- 🖼️ Custom cover art support
+- 📂 Direct game file access
+
+#### User Experience
 - 🌓 Dark/Light theme support
-- 🔍 Advanced search and filtering
-- ⭐ Favorites system
-- 📱 Responsive design for all devices
-- 🎯 Quick game launching
-- 📊 Game organization by system
+- 🚀 Fast, modern interface
 - 🔄 Real-time connection status
-- ⚡ Fast and efficient
+- 🎯 Quick game launching
+- 💾 Persistent settings
+- 🏃 Recent games tracking
 
-## Credits
+#### Social Features
+- 👤 User profiles with custom handles
+- 🏆 Global leaderboards
+- 🎯 Achievement system
+- ⏱️ Playtime tracking
+- 📊 Game statistics
 
-This project is a fork of the game launcher component from the Zaparoo project.
+#### Advanced Features
+- 👨‍👩‍👧‍👦 Multi-user support
+- 🔒 Parental controls
+- 👥 User role management
+- 🔐 Secure authentication
+- 🔄 WebSocket connectivity
+- 🌐 Remote game launching
 
-### Original Authors
+#### Supported Systems
+- Nintendo Entertainment System (NES)
+- Super Nintendo (SNES)
+- Sega Genesis
+- Arcade Systems
+- Commodore Amiga
+- MSX
+- And many more...
 
-- **Callan Barrett** (wizzomafizzo)
-- **Bjorn Logan** (Anime0t4ku)
+## Technology Stack
 
-### Technologies
-
-- React
-- TypeScript
-- Tailwind CSS
-- Supabase
-- Vite
+- ⚛️ React 18
+- 🔷 TypeScript
+- 🎨 Tailwind CSS
+- 🗄️ Supabase
+- ⚡ Vite
+- 🔌 WebSocket
 
 ## Development
 
@@ -47,6 +71,18 @@ npm run dev
 # Build for production
 npm run build
 ```
+
+## Deployment
+
+The application can be easily deployed to Netlify or other hosting platforms. The build process is automatically configured for optimal production deployment.
+
+## Credits
+
+This project is a fork of the game launcher component from the Zaparoo project.
+
+### Original Authors
+- **Callan Barrett** (wizzomafizzo)
+- **Bjorn Logan** (Anime0t4ku)
 
 ## License
 

@@ -15,7 +15,7 @@ export default function GameCard({ game, onSelect }: GameCardProps) {
     >
       <div className="aspect-[3/4] rounded-lg overflow-hidden shadow-md dark:shadow-gray-800 relative">
         <img
-          src={game.coverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'}
+          src={game.cover_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'}
           alt={game.title}
           className="w-full h-full object-cover"
           loading="lazy"

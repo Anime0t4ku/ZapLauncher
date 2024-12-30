@@ -7,7 +7,7 @@ export interface Game {
   path?: string;
   lastPlayed?: string;
   favorite: boolean;
-  coverUrl?: string;
+  cover_url?: string;
   description?: string;
   releaseYear?: string;
   developer?: string;

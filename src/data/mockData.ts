@@ -2,51 +2,102 @@ import { Game } from '../types';
 
 export const games: Game[] = [
   {
-    id: 'c8b5f8d0-5f3c-4b3c-8e0a-0f8b0f8b0f8b',
-    title: 'Super Mario Bros.',
+    id: 'smb-1',
+    title: "Super Mario Bros.",
     system_id: 'nes',
-    path: '/games/nes/Super Mario Bros.nes',
-    last_played: '2024-03-10T15:30:00Z',
+    path: "/NES/USA/Super%20Mario%20Bros.%20(USA).nes",
+    description: "The classic platformer where Mario saves Princess Peach.",
+    cover_url: "https://images.launchbox-app.com/e078d459-a166-47a2-9b5a-26a9fd7cd924.jpg",
     favorite: true,
-    cover_url: 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=800',
-    description: 'The classic platformer that defined a generation.',
     release_year: '1985',
     developer: 'Nintendo',
-    genre: 'Platformer',
-    user_id: '',
-    created_at: '2024-03-10T15:30:00Z',
-    updated_at: '2024-03-10T15:30:00Z'
+    genre: 'Platformer'
   },
   {
-    id: 'd9c6g9e1-6g4d-5c4d-9f1b-1g9c1g9c1g9c',
-    title: 'Sonic the Hedgehog',
-    system_id: 'genesis',
-    path: '/games/genesis/Sonic the Hedgehog.md',
-    last_played: '2024-03-09T18:20:00Z',
+    id: 'zelda-1',
+    title: "The Legend of Zelda",
+    system_id: 'nes',
+    path: "/NES/USA/Legend%20of%20Zelda,%20The%20(USA)%20(Rev%201).nes",
+    description: "Explore dungeons, solve puzzles, and defeat Ganon!",
+    cover_url: "https://images.launchbox-app.com/cf17144e-91bb-4727-953b-905aa894644c.png",
     favorite: false,
-    cover_url: 'https://images.unsplash.com/photo-1642411867508-4f4cb38e3b56?w=800',
-    description: 'SEGA\'s high-speed answer to Mario.',
+    release_year: '1986',
+    developer: 'Nintendo',
+    genre: 'Action-Adventure'
+  },
+  
+  {
+    id: 'smw-1',
+    title: "Super Mario World",
+    system_id: 'snes',
+    path: "/SNES/USA/Super%20Mario%20World%20(USA).sfc",
+    description: "Join Mario and Yoshi in this epic adventure!",
+    cover_url: "https://images.launchbox-app.com/1a175c33-1c72-4524-bc46-9f88b566cb16.jpg",
+    favorite: true,
+    release_year: '1990',
+    developer: 'Nintendo',
+    genre: 'Platformer'
+  },
+  {
+    id: 'alttp-1',
+    title: "The Legend of Zelda: A Link to the Past",
+    system_id: 'snes',
+    path: "/SNES/USA/Legend%20of%20Zelda,%20The%20-%20A%20Link%20to%20the%20Past%20(USA).sfc",
+    description: "Help Link save Hyrule in this SNES classic.",
+    cover_url: "https://images.launchbox-app.com/04cfaf16-9aa5-42da-b326-a43149b01f75.jpg",
+    favorite: false,
+    release_year: '1991',
+    developer: 'Nintendo',
+    genre: 'Action-Adventure'
+  },
+
+  {
+    id: 'sonic-1',
+    title: "Sonic the Hedgehog",
+    system_id: 'genesis',
+    path: "/Genesis/Sonic%20The%20Hedgehog%20(USA).md",
+    description: "Speed through levels and stop Dr. Robotnik!",
+    cover_url: "https://images.launchbox-app.com/f7f1fdbd-fc6f-430c-8a33-35516e01690c.png",
+    favorite: true,
     release_year: '1991',
     developer: 'Sega',
-    genre: 'Platformer',
-    user_id: '',
-    created_at: '2024-03-09T18:20:00Z',
-    updated_at: '2024-03-09T18:20:00Z'
+    genre: 'Platformer'
   },
   {
-    id: 'e0d7h0f2-7h5e-6d5e-0g2c-2h0d2h0d2h0d',
-    title: 'Street Fighter II',
-    system_id: 'arcade',
-    path: '/games/arcade/Street Fighter II.zip',
-    last_played: '2024-03-08T21:15:00Z',
-    favorite: true,
-    cover_url: 'https://images.unsplash.com/photo-1551103782-8ab07afd45c1?w=800',
-    description: 'The fighting game that started a revolution.',
+    id: 'sor-1',
+    title: "Streets of Rage",
+    system_id: 'genesis',
+    path: "/Genesis/Streets%20of%20Rage%202%20(USA).md",
+    description: "Fight against crime in this beat 'em up classic.",
+    cover_url: "https://images.launchbox-app.com/75e8efc5-67bb-4dd3-971f-2784dbb8529e.jpg",
+    favorite: false,
     release_year: '1991',
-    developer: 'Capcom',
-    genre: 'Fighting',
-    user_id: '',
-    created_at: '2024-03-08T21:15:00Z',
-    updated_at: '2024-03-08T21:15:00Z'
+    developer: 'Sega',
+    genre: 'Beat-em-up'
+  },
+
+  {
+    id: 'mgs-1',
+    title: "Metal Gear Solid",
+    system_id: 'psx',
+    path: "/PSX/USA/Multi%20Disc%20(CHD)/Metal%20Gear%20Solid%20(USA)/Metal%20Gear%20Solid%20(USA)%20(Disc%201)%20(v1.1).chd",
+    description: "Solid Snake must stop the terrorists at Shadow Moses.",
+    cover_url: "https://images.launchbox-app.com/5e05d377-f292-41ec-a652-1b817ea2f7bb.jpg",
+    favorite: true,
+    release_year: '1998',
+    developer: 'Konami',
+    genre: 'Action-Adventure'
+  },
+  {
+    id: 'crash-3',
+    title: "Crash Bandicoot 3",
+    system_id: 'psx',
+    path: "/PSX/USA/Crash%20Bandicoot%20-%20Warped%20(USA).chd",
+    description: "Gather all crystal by traveling back in different time periods and stop DR. Neo Cortex.",
+    cover_url: "https://images.launchbox-app.com/62058421-e686-46b2-a731-4a7a401bfb07.jpg",
+    favorite: false,
+    release_year: '1998',
+    developer: 'Naughty Dog',
+    genre: 'Platformer'
   }
 ];

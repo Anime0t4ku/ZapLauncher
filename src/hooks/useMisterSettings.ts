@@ -39,7 +39,10 @@ export function useMisterSettings() {
   const updateSettings = async (ipAddress: string, isConnected: boolean) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
+      if (!user) {
+        setError('User not authenticated');
+        return;
+      }
 
       const updates = {
         user_id: user.id,
@@ -48,20 +51,25 @@ export function useMisterSettings() {
         last_connected: isConnected ? new Date().toISOString() : null
       };
 
+      let result;
       if (settings?.id) {
-        const { error } = await supabase
+        result = await supabase
           .from('mister_settings')
           .update(updates)
-          .eq('id', settings.id);
-        if (error) throw error;
+          .eq('id', settings.id)
+          .select()
+          .single();
       } else {
-        const { error } = await supabase
+        result = await supabase
           .from('mister_settings')
-          .insert([updates]);
-        if (error) throw error;
+          .insert([updates])
+          .select()
+          .single();
       }
 
-      setSettings({ ...settings, ...updates } as MisterSettings);
+      if (result.error) throw result.error;
+      setSettings(result.data as MisterSettings);
+      setError(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update settings');
       throw err;

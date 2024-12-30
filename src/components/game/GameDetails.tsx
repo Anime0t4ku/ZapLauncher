@@ -23,7 +23,7 @@ export default function GameDetails({ game, onBack, onLaunch }: GameDetailsProps
         {/* Cover Art */}
         <div className="relative aspect-[3/4] rounded-xl overflow-hidden shadow-lg">
           <img
-            src={game.coverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'}
+            src={game.cover_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=800'}
             alt={game.title}
             className="w-full h-full object-cover"
           />

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Mail, Lock, UserPlus, AlertTriangle } from 'lucide-react';
+import { Mail, Lock, UserPlus, AlertTriangle, User } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 
 interface SignUpFormProps {
@@ -9,6 +9,7 @@ interface SignUpFormProps {
 export default function SignUpForm({ onSignIn }: SignUpFormProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [handle, setHandle] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -28,11 +29,23 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
       return;
     }
 
+    if (!/^[a-zA-Z0-9_-]{3,30}$/.test(handle)) {
+      setError('Handle must be 3-30 characters and can only contain letters, numbers, underscore, or hyphen');
+      return;
+    }
+
     setLoading(true);
 
     try {
       const { error: signUpError } = await signUp(email, password);
       if (signUpError) throw signUpError;
+      
+      // Set user handle
+      const { error: handleError } = await supabase.rpc('verify_user_handle', {
+        handle: handle
+      });
+      if (handleError) throw handleError;
+      
       // On success, show message about email verification
       setError('Check your email for a verification link');
     } catch (err) {
@@ -101,6 +114,23 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
               required
               className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 dark:text-white"
               placeholder="••••••••"
+            />
+          </div>
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            Handle
+          </label>
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input
+              type="text"
+              value={handle}
+              onChange={(e) => setHandle(e.target.value)}
+              required
+              className="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-600 dark:text-white"
+              placeholder="Choose a unique handle"
             />
           </div>
         </div>

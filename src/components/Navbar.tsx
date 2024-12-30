@@ -1,6 +1,7 @@
 import React from 'react';
-import { Settings, ArrowLeft, Menu, PanelLeftOpen } from 'lucide-react';
+import { ArrowLeft, Menu, PanelLeftOpen } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
+import ProfileMenu from './ProfileMenu';
 import { useWebSocket } from '../hooks/useWebSocket';
 
 interface NavbarProps {
@@ -38,12 +39,7 @@ export default function Navbar({ onOpenSettings, onMenuClick, onBack, showBack }
           <div className="flex items-center gap-4">
             <ConnectionStatus isConnected={isConnected} />
             
-            <button
-              onClick={onOpenSettings}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-            >
-              <Settings className="w-5 h-5 text-gray-600 dark:text-gray-300" />
-            </button>
+            <ProfileMenu onOpenSettings={onOpenSettings} />
           </div>
         </div>
       </div>

@@ -9,8 +9,8 @@ export function useWebSocket() {
   const { settings, updateSettings } = useMisterSettings();
 
   const getWebSocketUrl = useCallback((ipAddress: string) => {
-    const isProt = ipAddress.startsWith('http://') || ipAddress.startsWith('https://');
-    const cleanIp = isProt ? ipAddress.replace(/(^\w+:|^)\/\//, '') : ipAddress;
+    // Remove protocol and trailing slashes
+    const cleanIp = ipAddress.replace(/^https?:\/\//, '').replace(/\/$/, '');
     return cleanIp;
   }, []);
 
@@ -28,7 +28,8 @@ export function useWebSocket() {
       setError(null);
       await updateSettings(settings.ip_address, true);
     } catch (err) {
-      setError('Failed to connect to MiSTer');
+      const errorMsg = err instanceof Error ? err.message : 'Failed to connect to MiSTer';
+      setError(errorMsg);
       await updateSettings(settings.ip_address, false);
       console.error('WebSocket connection error:', err);
     }
@@ -45,13 +46,15 @@ export function useWebSocket() {
 
   const launchGame = useCallback((gamePath: string) => {
     if (!wsService || !isConnected) {
+      console.error('Cannot launch game: WebSocket not connected');
       return;
     }
 
     const isProt = settings.ip_address.startsWith('http://') || settings.ip_address.startsWith('https://');
     const prot = isProt ? '' : 'http://';
     const encodedUrl = encodeURIComponent(gamePath).replace(/%2F/g, '/').replace(/%20/g, ' ');
-    window.location.href = `${prot}${settings.ip_address}:7497/l/${encodedUrl}`;
+    const launchUrl = `${prot}${getWebSocketUrl(settings.ip_address)}:7497/l/${encodedUrl}`;
+    window.location.href = launchUrl;
   }, [wsService, isConnected, settings?.ip_address]);
 
   useEffect(() => {

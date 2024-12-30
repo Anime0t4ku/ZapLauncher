@@ -18,7 +18,7 @@ export default function GameList({ games, onGameSelect }: GameListProps) {
         >
           <div className="flex-shrink-0 w-16 h-16">
             <img
-              src={game.coverUrl || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'}
+              src={game.cover_url || 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=400'}
               alt={game.title}
               className="w-full h-full object-cover rounded-lg shadow-sm"
               loading="lazy"
