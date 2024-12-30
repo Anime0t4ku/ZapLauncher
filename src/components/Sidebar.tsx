@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { System } from '../types/system';
-import { Star, Trophy, Gamepad2, Cpu, Sword, Joystick, ChevronRight } from 'lucide-react';
+import { Star, Trophy, CreditCard, Gamepad2, Cpu, Sword, Joystick, ChevronRight } from 'lucide-react';
 import Tooltip from './Tooltip';
 import ThemeToggle from './ThemeToggle';
 
@@ -73,6 +73,19 @@ export default function Sidebar({
                   <div className="flex items-center gap-3">
                   <Star className="w-4 h-4" />
                   <span>Overview</span>
+                  </div>
+                </Tooltip>
+                <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100" />
+              </button>
+
+              <button
+                onClick={() => onCoreSelect('collection')}
+                className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-sm"
+              >
+                <Tooltip content="View your Zaparoo card collection">
+                  <div className="flex items-center gap-3">
+                    <CreditCard className="w-4 h-4" />
+                    <span>Collection</span>
                   </div>
                 </Tooltip>
                 <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100" />

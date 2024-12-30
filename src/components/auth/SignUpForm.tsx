@@ -38,20 +38,17 @@ export default function SignUpForm({ onSignIn }: SignUpFormProps) {
 
     try {
       const { error: signUpError } = await signUp(email, password);
-      if (signUpError) throw signUpError;
+      if (signUpError) {
+        setError(signUpError);
+        return;
+      }
       
-      // Set user handle
-      const { error: handleError } = await supabase.rpc('verify_user_handle', {
-        handle: handle
-      });
-      if (handleError) throw handleError;
-      
-      // On success, show message about email verification
-      setError('Check your email for a verification link');
+      // Show success message with custom styling
+      setError('✓ Check your email for a verification link');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to sign up');
+      setError('Failed to sign up. Please try again.');
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 

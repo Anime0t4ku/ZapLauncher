@@ -20,12 +20,19 @@ export function useMisterSettings() {
 
         const { data, error: fetchError } = await supabase
           .from('mister_settings')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
+          .select()
+          .eq('user_id', user.id);
 
-        if (fetchError) throw fetchError;
-        setSettings(data);
+        if (fetchError) {
+          if (fetchError.code === 'PGRST116') {
+            // No settings found - this is okay for new users
+            setSettings(null);
+          } else {
+            throw fetchError;
+          }
+        } else {
+          setSettings(data?.[0] || null);
+        }
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load settings');
       } finally {
