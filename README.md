@@ -81,6 +81,7 @@ The application can be easily deployed to Netlify or other hosting platforms. Th
 - Wizzo
 - Davidpreid
 - vlinpalm
+- BedroomNinja
 
 ## License
 
