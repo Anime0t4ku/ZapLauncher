@@ -1,6 +1,6 @@
 # ZapLauncher
 
-A modern, feature-rich web interface for MiSTer FPGA game management, forked from the Zaparoo project.
+A modern, feature-rich web interface for MiSTer FPGA game management, using the Zaparoo websocket.
 
 ## About
 
