@@ -1,14 +1,28 @@
 import React from 'react';
 import { Star, Calendar, User, Tag, Play, ArrowLeft } from 'lucide-react';
+import { useZaparoo } from '../../hooks/useZaparoo';
 import { Game } from '../../types';
 
 interface GameDetailsProps {
   game: Game;
   onBack: () => void;
-  onLaunch: (game: Game) => void;
 }
 
-export default function GameDetails({ game, onBack, onLaunch }: GameDetailsProps) {
+export default function GameDetails({ game, onBack }: GameDetailsProps) {
+  const { launchGame, isConnected } = useZaparoo();
+
+  const handleLaunch = async () => {
+    if (!game.path) {
+      console.error('Game path not available:', game.title);
+      return;
+    }
+    try {
+      await launchGame(game.path);
+    } catch (error) {
+      console.error('Failed to launch game:', error);
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto p-4">
       <button
@@ -63,11 +77,12 @@ export default function GameDetails({ game, onBack, onLaunch }: GameDetailsProps
           </div>
 
           <button
-            onClick={() => onLaunch(game)}
+            onClick={handleLaunch}
+            disabled={!isConnected}
             className="w-full flex items-center justify-center space-x-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             <Play className="w-5 h-5" />
-            <span>Launch Game</span>
+            <span>{isConnected ? 'Launch Game' : 'Not Connected'}</span>
           </button>
         </div>
       </div>

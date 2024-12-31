@@ -1,8 +1,7 @@
 import React from 'react';
-import { ArrowLeft, Menu, PanelLeftOpen, Zap } from 'lucide-react';
+import { ArrowLeft, PanelLeftOpen } from 'lucide-react';
 import ConnectionStatus from './ConnectionStatus';
 import ProfileMenu from './ProfileMenu';
-import { useWebSocket } from '../hooks/useWebSocket';
 
 interface NavbarProps {
   onOpenSettings: () => void;
@@ -12,8 +11,6 @@ interface NavbarProps {
 }
 
 export default function Navbar({ onOpenSettings, onMenuClick, onBack, showBack }: NavbarProps) {
-  const { isConnected } = useWebSocket();
-
   return (
     <nav className="sticky top-0 z-40 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border-b border-gray-200 dark:border-gray-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -34,16 +31,22 @@ export default function Navbar({ onOpenSettings, onMenuClick, onBack, showBack }
                 <PanelLeftOpen className="w-5 h-5 text-gray-600 dark:text-gray-300" />
               </button>
             )}
-            <div className="flex items-center gap-2">
-              <Zap className="w-6 h-6 text-blue-500" />
-              <span className="text-lg font-bold text-gray-900 dark:text-white">
-                ZapLauncher
-              </span>
+            <div className="flex items-center">
+              <img
+                src="https://ifrwkujnkpodngmrtgqf.supabase.co/storage/v1/object/public/zaplogos/ZapLauncher%20-%20Black.png?t=2024-12-31T18%3A40%3A52.370Z"
+                alt="ZapLauncher"
+                className="h-8 dark:hidden"
+              />
+              <img
+                src="https://ifrwkujnkpodngmrtgqf.supabase.co/storage/v1/object/public/zaplogos/ZapLauncher%20-%20White.png"
+                alt="ZapLauncher"
+                className="h-8 hidden dark:block"
+              />
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <ConnectionStatus isConnected={isConnected} />
+            <ConnectionStatus />
             
             <ProfileMenu onOpenSettings={onOpenSettings} />
           </div>
