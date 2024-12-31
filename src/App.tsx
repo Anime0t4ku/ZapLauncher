@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { useZaparoo } from './hooks/useZaparoo';
 import AuthCallback from './components/auth/AuthCallback';
 import Auth from './pages/Auth';
 import Sidebar from './components/Sidebar';
@@ -22,7 +23,6 @@ import { systems } from './data/systems';
 import { Game, ViewMode } from './types';
 import { sortGames } from './utils/gameUtils';
 import { SortOption } from './components/search/SortSelect';
-import { useWebSocket } from './hooks/useWebSocket';
 
 function App() {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -34,7 +34,7 @@ function App() {
   const [sortBy, setSortBy] = useState<SortOption>('title');
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [addGameOpen, setAddGameOpen] = useState(false);
-  const { isConnected, error: wsError, launchGame } = useWebSocket();
+  const { isConnected } = useZaparoo();
 
   const filteredGames = useMemo(() => {
     const filtered = games.filter((game) => {
@@ -55,15 +55,6 @@ function App() {
 
   const handleGameSelect = (game: Game) => {
     setSelectedGame(game);
-  };
-
-  const handleGameLaunch = (game: Game) => {
-    if (!game.path) {
-      console.error('Game path not available:', game.title);
-      return;
-    }
-    
-    launchGame(game.path);
   };
 
   const handleGameAdded = (game: Game) => {
@@ -121,9 +112,7 @@ function App() {
                   {selectedGame ? (
                     <GameDetails
                       game={selectedGame}
-                      onBack={() => setSelectedGame(null)}
-                      onLaunch={handleGameLaunch}
-                    />
+                      onBack={() => setSelectedGame(null)} />
                   ) : selectedCore === 'collection' ? (
                     <CardCollection />
                   ) : selectedCore === 'leaderboard' ? (

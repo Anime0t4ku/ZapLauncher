@@ -19,7 +19,7 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
     async function loadUserHandle() {
       if (!user) return;
       const { data, error } = await supabase
-        .from('user_roles')
+        .from('user_handles')
         .select('handle')
         .eq('user_id', user.id);
 
@@ -52,21 +52,26 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
   const updateHandle = async (newHandle: string) => {
     if (!user) return;
     if (!newHandle.trim()) return;
+    if (newHandle === handle) {
+      setIsEditingHandle(false);
+      return;
+    }
+
     setError(null);
 
     try {
-      const { data, error } = await supabase.rpc('verify_user_handle', {
+      const { data, error: verifyError } = await supabase.rpc('verify_user_handle', {
         user_id: user.id,
         new_handle: newHandle
       });
 
-      if (error) throw error;
+      if (verifyError) throw verifyError;
 
-      if (data.success) {
+      if (data && data.success) {
         setHandle(data.handle);
         setIsEditingHandle(false);
       } else {
-        throw new Error(data.error);
+        throw new Error(data?.error || 'Failed to update handle');
       }
     } catch (error) {
       console.error('Failed to update handle:', error);
@@ -100,12 +105,13 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
               <input
                 type="text"
                 value={handle}
-                onChange={(e) => setHandle(e.target.value)}
+                onChange={(e) => setHandle(e.target.value.trim())}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
                     updateHandle(handle);
                   } else if (e.key === 'Escape') {
                     setIsEditingHandle(false);
+                    setError(null);
                   }
                 }}
                 onBlur={() => {
@@ -113,11 +119,14 @@ export default function ProfileMenu({ onOpenSettings }: ProfileMenuProps) {
                     updateHandle(handle);
                   } else {
                     setIsEditingHandle(false);
+                    setError(null);
                   }
                 }}
                 className="mt-1 w-full px-2 py-1 bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 dark:text-white"
                 placeholder="Enter handle..."
                 autoFocus
+                maxLength={30}
+                pattern="^[a-zA-Z0-9][a-zA-Z0-9_-]*$"
               />
             ) : (
               <p className="mt-1 font-medium text-gray-900 dark:text-white">
