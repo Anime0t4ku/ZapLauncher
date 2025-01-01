@@ -1,152 +1,175 @@
-import { useState, useMemo } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import AuthCallback from './components/auth/AuthCallback';
-import Auth from './pages/Auth';
-import Navbar from './components/Navbar';
-import SystemGrid from './components/systems/SystemGrid';
-import GameDetails from './components/game/GameDetails';
-import GameGrid from './components/GameGrid';
-import GameList from './components/GameList';
-import BottomNav from './components/BottomNav';
-import GameActions from './components/game/GameActions';
-import SearchOverlay from './components/SearchOverlay';
-import SettingsModal from './components/settings/SettingsModal';
-import AddGameModal from './components/game/AddGameModal';
-import RecentGames from './components/dashboard/RecentGames';
-import FavoritesCard from './components/systems/FavoritesCard';
-import { games } from './data/mockData';
-import { systems } from './data/systems';
-import { Game, ViewMode } from './types';
-import { sortGames } from './utils/gameUtils';
-import { SortOption } from './components/search/SortSelect';
-import { useWebSocket } from './hooks/useWebSocket';
+import React, { useState } from 'react';
+import { Upload, X, ImageIcon, Camera } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
-function App() {
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [settingsOpen, setSettingsOpen] = useState(false);
-  const [selectedCore, setSelectedCore] = useState<string | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('title');
-  const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [addGameOpen, setAddGameOpen] = useState(false);
-  const { isConnected, error: wsError, launchGame } = useWebSocket();
+interface BackgroundUploadProps {
+  systemId: string;
+  onUploadComplete: (url: string) => void;
+}
 
-  const filteredGames = useMemo(() => {
-    const filtered = games.filter((game) => {
-      const matchesCore = selectedCore ? game.system_id === selectedCore : true;
-      const query = searchQuery.toLowerCase();
-      const matchesSearch = 
-        game.title.toLowerCase().includes(query) ||
-        (game.genre?.toLowerCase().includes(query) || false) ||
-        (game.developer?.toLowerCase().includes(query) || false);
-      return matchesCore && matchesSearch;
-    });
-    return sortGames(filtered, sortBy);
-  }, [selectedCore, searchQuery, sortBy]);
+export default function BackgroundUpload({ systemId, onUploadComplete }: BackgroundUploadProps) {
+  const [uploading, setUploading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const favoriteGames = useMemo(() => {
-    return games.filter(game => game.favorite);
-  }, []);
-
-  const handleGameSelect = (game: Game) => {
-    setSelectedGame(game);
+  const handleModalOpen = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsModalOpen(true);
   };
 
-  const handleGameLaunch = (game: Game) => {
-    if (!game.path) {
-      console.error('Game path not available:', game.title);
+  const handleModalClose = (e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    setIsModalOpen(false);
+    setError(null);
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please select an image file');
       return;
     }
-    
-    launchGame(game.path);
-  };
 
-  const handleGameAdded = (game: Game) => {
-    // Update local state or trigger a refresh
-    console.log('Game added:', game);
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setError('Image must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    setError(null);
+
+    try {
+      // Get image dimensions
+      const img = new Image();
+      const imgUrl = URL.createObjectURL(file);
+      
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = imgUrl;
+      });
+
+      // Upload to storage
+      const timestamp = new Date().getTime();
+      const storagePath = `${systemId}/background-${timestamp}.${file.name.split('.').pop()}`;
+      
+      const { error: uploadError, data } = await supabase.storage
+        .from('system-images')
+        .upload(storagePath, file, {
+          cacheControl: '3600',
+          upsert: true
+        });
+
+      if (uploadError) throw uploadError;
+
+      // Create image record
+      const { error: insertError } = await supabase.rpc('upload_system_image', {
+        system_id: systemId,
+        image_type: 'background',
+        storage_path: storagePath,
+        width: img.width,
+        height: img.height,
+        size_bytes: file.size
+      });
+
+      if (insertError) throw insertError;
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('system-images')
+        .getPublicUrl(storagePath);
+      
+      console.log('Uploaded image URL:', publicUrl);
+
+      onUploadComplete(publicUrl);
+      handleModalClose();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to upload image');
+    } finally {
+      setUploading(false);
+    }
   };
 
   return (
-    <Router>
-      <Routes>
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/auth/callback" element={<AuthCallback />} />
-        <Route
-          path="/"
-          element={            
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors relative">
-                <Navbar 
-                  onOpenSettings={() => setSettingsOpen(true)}
-                  onBack={selectedGame ? () => setSelectedGame(null) : selectedCore ? () => setSelectedCore(null) : undefined}
-                  showBack={!!selectedCore || !!selectedGame}
-                />
+    <div className="relative">
+      <button
+        onClick={handleModalOpen}
+        className="p-2 rounded-full bg-black/20 hover:bg-black/30 transition-colors"
+      >
+        <Camera className="w-5 h-5 text-white" />
+      </button>
 
-                <SettingsModal
-                  isOpen={settingsOpen}
-                  onClose={() => setSettingsOpen(false)}
-                />
+      {isModalOpen && (
+        <div 
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+          onClick={handleModalClose}
+        >
+          <div 
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-md w-full p-6"
+            onClick={e => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Upload Background Image
+              </h3>
+              <button
+                onClick={handleModalClose}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full"
+              >
+                <X className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+              </button>
+            </div>
 
-                <AddGameModal
-                  isOpen={addGameOpen}
-                  onClose={() => setAddGameOpen(false)}
-                  onGameAdded={handleGameAdded}
-                />
-
-                <SearchOverlay
-                  isOpen={searchOpen}
-                  onClose={() => setSearchOpen(false)}
-                  onSearch={setSearchQuery}
-                  onSort={setSortBy}
-                  sortBy={sortBy}
-                />
-
-                <main className="pb-20">
-                  {selectedGame ? (
-                    <GameDetails
-                      game={selectedGame}
-                      onBack={() => setSelectedGame(null)}
-                      onLaunch={handleGameLaunch}
-                    />
-                  ) : !selectedCore ? (
-                    <div className="p-6 space-y-8">
-                      <RecentGames games={games} onGameSelect={handleGameSelect} />
-                      <SystemGrid
-                        systems={[
-                          ...systems,
-                          {
-                            id: 'favorites',
-                            component: <FavoritesCard
-                              favoriteCount={favoriteGames.length}
-                              onClick={() => setSelectedCore('favorites')}
-                            />
-                          }
-                        ]}
-                        onSystemSelect={setSelectedCore}
-                      />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+              id="background-upload"
+              disabled={uploading}
+            />
+            <label
+              htmlFor="background-upload"
+              className={`flex flex-col items-center justify-center w-full h-48 border-2 border-dashed rounded-lg cursor-pointer
+                ${uploading
+                  ? 'border-gray-300 bg-gray-50 dark:bg-gray-800/50'
+                  : 'border-gray-300 hover:border-blue-500 hover:bg-blue-50/5 dark:border-gray-700 dark:hover:border-blue-500'
+                }`}
+            >
+              <div className="space-y-2 text-center">
+                {uploading ? (
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+                ) : (
+                  <>
+                    <ImageIcon className="mx-auto h-12 w-12 text-gray-400" />
+                    <div>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        Click or drag image to upload
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
+                        PNG, JPG up to 5MB
+                      </p>
                     </div>
-                  ) : viewMode === 'grid' ? (
-                    <GameGrid games={filteredGames} onGameSelect={handleGameSelect} />
-                  ) : (
-                    <GameList games={filteredGames} onGameSelect={handleGameSelect} />
-                  )}
-                </main>
-
-                {!selectedGame && (
-                  <GameActions onAddGame={() => setAddGameOpen(true)} />
+                  </>
                 )}
-
-                <BottomNav
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
-                  onSearchClick={() => setSearchOpen(true)} 
-                />
               </div>
-          }
-        />
-      </Routes>
-    </Router>
+            </label>
+
+            {error && (
+              <div className="mt-4 flex items-center justify-between text-sm text-red-500 bg-red-50 dark:bg-red-900/30 px-3 py-2 rounded">
+                <span>{error}</span>
+                <button onClick={() => setError(null)}>
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
-
-export default App;
